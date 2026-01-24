@@ -6,26 +6,35 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      - name: Setup Environment
+      - name: Setup Java 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      
+      - name: Install Android SDK
         run: |
-          # 安装所有必要工具
           sudo apt update
           sudo apt install -y \
-            openjdk-17-jdk \
-            gradle \
+            wget \
+            unzip \
             android-sdk
-          
-          # 验证安装
-          java --version
+      
+      - name: Force Download Gradle 8.5
+        run: |
+          # 手动下载Gradle 8.5
+          wget -q https://services.gradle.org/distributions/gradle-8.5-bin.zip
+          unzip -q gradle-8.5-bin.zip
+          export PATH="$PWD/gradle-8.5/bin:$PATH"
           gradle --version
       
-      - name: Build
+      - name: Build APK
         run: |
-          # 直接使用gradle命令
-          gradle :app:assembleDebug --stacktrace 2>&1
+          # 使用下载的Gradle
+          ./gradle-8.5/bin/gradle :app:assembleDebug --stacktrace --no-daemon
       
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: android-app
-          path: app/build/outputs/apk/**/*.apk
+          name: android-apk
+          path: app/build/outputs/apk/debug/*.apk
