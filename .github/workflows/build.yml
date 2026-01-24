@@ -1,4 +1,4 @@
-name: Android CI
+name: Android Build
 on: [push]
 jobs:
   build:
@@ -12,29 +12,16 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
       
-      - name: Install Android SDK
-        run: |
-          sudo apt update
-          sudo apt install -y \
-            wget \
-            unzip \
-            android-sdk
-      
-      - name: Force Download Gradle 8.5
-        run: |
-          # 手动下载Gradle 8.5
-          wget -q https://services.gradle.org/distributions/gradle-8.5-bin.zip
-          unzip -q gradle-8.5-bin.zip
-          export PATH="$PWD/gradle-8.5/bin:$PATH"
-          gradle --version
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v2
       
       - name: Build APK
         run: |
-          # 使用下载的Gradle
-          ./gradle-8.5/bin/gradle :app:assembleDebug --stacktrace --no-daemon
+          chmod +x ./gradlew
+          ./gradlew :app:assembleDebug --stacktrace --no-daemon
       
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: android-apk
+          name: app-debug
           path: app/build/outputs/apk/debug/*.apk
