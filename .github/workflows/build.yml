@@ -1,32 +1,17 @@
-name: Build APK
+name: Android Build
 on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
-      - name: Setup Java 17
-        uses: actions/setup-java@v3
+      - uses: actions/setup-java@v3
         with:
           java-version: '17'
           distribution: 'temurin'
-      
-      - name: Install Gradle directly
-        run: |
-          # 直接安装Gradle，不使用wrapper
-          wget https://services.gradle.org/distributions/gradle-8.5-bin.zip
-          unzip gradle-8.5-bin.zip
-          export PATH="$PWD/gradle-8.5/bin:$PATH"
-          gradle --version
-      
-      - name: Build APK
-        run: |
-          # 使用直接安装的gradle
-          ./gradle-8.5/bin/gradle assembleDebug --stacktrace
-      
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
+      - uses: android-actions/setup-android@v2
+      - run: chmod +x ./gradlew && ./gradlew :app:assembleDebug
+      - uses: actions/upload-artifact@v4
         with:
-          name: app-debug
+          name: app-apk
           path: app/build/outputs/apk/debug/*.apk
