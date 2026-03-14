@@ -5,9 +5,11 @@
 
     <application
         android:label="ImGui"
-        android:theme="@style/Theme.AppCompat.Light">
-        <activity android:name=".MainActivity"
+        android:hasCode="true">
+        <activity android:name="android.app.NativeActivity"
             android:exported="true">
+            <meta-data android:name="android.app.lib_name"
+                android:value="myimgui" />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

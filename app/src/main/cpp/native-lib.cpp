@@ -1,9 +1,7 @@
-#include <android/native_activity.h>
-#include <android/looper.h>
+#include <android_native_app_glue.h>
 #include <android/log.h>
 #include <EGL/egl.h>
 #include <GLES3/gl3.h>
-#include <poll.h>
 
 #include "imgui.h"
 #include "backends/imgui_impl_android.h"
@@ -11,7 +9,7 @@
 
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, "ImGui", __VA_ARGS__)
 
-extern "C" void android_main(struct android_app* app) {
+void android_main(struct android_app* app) {
     app->onAppCmd = [](struct android_app* app, int32_t cmd) {
         if (cmd == APP_CMD_INIT_WINDOW) {
             IMGUI_CHECKVERSION();
