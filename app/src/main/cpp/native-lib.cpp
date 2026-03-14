@@ -1,7 +1,9 @@
 #include <android/native_activity.h>
+#include <android/looper.h>
 #include <android/log.h>
 #include <EGL/egl.h>
 #include <GLES3/gl3.h>
+#include <poll.h>
 
 #include "imgui.h"
 #include "backends/imgui_impl_android.h"
@@ -9,7 +11,7 @@
 
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, "ImGui", __VA_ARGS__)
 
-void android_main(struct android_app* app) {
+extern "C" void android_main(struct android_app* app) {
     app->onAppCmd = [](struct android_app* app, int32_t cmd) {
         if (cmd == APP_CMD_INIT_WINDOW) {
             IMGUI_CHECKVERSION();
@@ -36,12 +38,10 @@ void android_main(struct android_app* app) {
 
                 ImGui::SetNextWindowPos(ImVec2(50, 50), ImGuiCond_FirstUseEver);
                 ImGui::SetNextWindowSize(ImVec2(400, 300), ImGuiCond_FirstUseEver);
-                ImGui::Begin("系统监控", nullptr);
-                ImGui::Text("CPU: 45.6%%");
-                ImGui::ProgressBar(0.456f, ImVec2(-1, 0), "");
-                ImGui::Text("内存: 3.2/8.0 GB");
-                ImGui::ProgressBar(0.4f, ImVec2(-1, 0), "");
-                if (ImGui::Button("关闭")) {
+                ImGui::Begin("ImGui on Android", nullptr);
+                ImGui::Text("Hello, Android!");
+                ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
+                if (ImGui::Button("Close")) {
                     running = false;
                 }
                 ImGui::End();
