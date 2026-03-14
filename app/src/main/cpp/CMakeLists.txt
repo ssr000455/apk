@@ -19,7 +19,6 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(imgui)
 
-# 设置 ImGui 源码路径
 set(IMGUI_DIR ${imgui_SOURCE_DIR})
 
 # 添加 native_app_glue
@@ -29,6 +28,16 @@ add_library(native_app_glue STATIC
 
 # 添加主库
 add_library(myimgui SHARED native-lib.cpp)
+
+# 将 ImGui 源文件直接添加到 myimgui 中
+target_sources(myimgui PRIVATE
+    ${IMGUI_DIR}/imgui.cpp
+    ${IMGUI_DIR}/imgui_draw.cpp
+    ${IMGUI_DIR}/imgui_tables.cpp
+    ${IMGUI_DIR}/imgui_widgets.cpp
+    ${IMGUI_DIR}/backends/imgui_impl_android.cpp
+    ${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp
+)
 
 # 包含目录
 target_include_directories(myimgui PRIVATE
@@ -44,10 +53,4 @@ target_link_libraries(myimgui
     android
     EGL
     GLESv3
-    ${IMGUI_DIR}/imgui.cpp
-    ${IMGUI_DIR}/imgui_draw.cpp
-    ${IMGUI_DIR}/imgui_tables.cpp
-    ${IMGUI_DIR}/imgui_widgets.cpp
-    ${IMGUI_DIR}/backends/imgui_impl_android.cpp
-    ${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp
 )
