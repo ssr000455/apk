@@ -1,0 +1,61 @@
+name: Build ImGui Android
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: ocornut/imgui
+          path: imgui
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Build with ndk-build
+        run: |
+          cd imgui/examples/example_android_opengl3
+          ${ANDROID_HOME}/ndk-bundle/ndk-build
+
+      - name: Package APK
+        run: |
+          cd imgui/examples/example_android_opengl3
+          mkdir -p apk/lib/arm64-v8a
+          cp libs/arm64-v8a/libnative-activity.so apk/lib/arm64-v8a/
+          cat > apk/AndroidManifest.xml << 'EOF2'
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+              package="com.imgui">
+              <uses-sdk android:minSdkVersion="24" android:targetSdkVersion="33" />
+              <application android:label="ImGui">
+                  <activity android:name="android.app.NativeActivity"
+                      android:exported="true">
+                      <meta-data android:name="android.app.lib_name"
+                          android:value="native-activity" />
+                      <intent-filter>
+                          <action android:name="android.intent.action.MAIN" />
+                          <category android:name="android.intent.category.LAUNCHER" />
+                      </intent-filter>
+                  </activity>
+              </application>
+          </manifest>
+          EOF2
+          ${ANDROID_HOME}/build-tools/33.0.1/aapt package -f -M apk/AndroidManifest.xml \
+            -I ${ANDROID_HOME}/platforms/android-33/android.jar -F unsigned.apk
+          ${ANDROID_HOME}/build-tools/33.0.1/aapt add unsigned.apk lib/arm64-v8a/libnative-activity.so
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: imgui-android-apk
+          path: imgui/examples/example_android_opengl3/unsigned.apk
