@@ -10,13 +10,29 @@ endif()
 
 message(STATUS "Using NDK: ${ANDROID_NDK_PATH}")
 
+# 下载 ImGui 源码
 include(FetchContent)
 FetchContent_Declare(
-    imgui
+    imgui_src
     GIT_REPOSITORY https://github.com/ocornut/imgui.git
     GIT_TAG v1.91.8
 )
-FetchContent_MakeAvailable(imgui)
+FetchContent_MakeAvailable(imgui_src)
+
+# 创建 ImGui 静态库
+add_library(imgui STATIC
+    ${imgui_src_SOURCE_DIR}/imgui.cpp
+    ${imgui_src_SOURCE_DIR}/imgui_draw.cpp
+    ${imgui_src_SOURCE_DIR}/imgui_tables.cpp
+    ${imgui_src_SOURCE_DIR}/imgui_widgets.cpp
+    ${imgui_src_SOURCE_DIR}/backends/imgui_impl_android.cpp
+    ${imgui_src_SOURCE_DIR}/backends/imgui_impl_opengl3.cpp
+)
+
+target_include_directories(imgui PUBLIC
+    ${imgui_src_SOURCE_DIR}
+    ${imgui_src_SOURCE_DIR}/backends
+)
 
 # 添加 native_app_glue
 add_library(native_app_glue STATIC
@@ -26,16 +42,16 @@ add_library(native_app_glue STATIC
 add_library(myimgui SHARED native-lib.cpp)
 
 target_include_directories(myimgui PRIVATE
-    ${imgui_SOURCE_DIR}
-    ${imgui_SOURCE_DIR}/backends
+    ${imgui_src_SOURCE_DIR}
+    ${imgui_src_SOURCE_DIR}/backends
     ${ANDROID_NDK_PATH}/sources/android/native_app_glue
 )
 
 target_link_libraries(myimgui
+    imgui
     native_app_glue
     log
     android
     EGL
     GLESv3
-    imgui
 )
